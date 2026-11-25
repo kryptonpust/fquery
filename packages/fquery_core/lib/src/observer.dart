@@ -163,7 +163,8 @@ class QueryObserver<TData, TError extends Exception>
         retryDelay: retryDelay,
       ),
     );
-    cache.build<TData, TError>(queryKey: queryKey);
+    // Registered so the cache does not collect the query while it is observed.
+    cache.build<TData, TError>(queryKey: queryKey, observer: this);
     cache.subscribe(hashCode, _onQueryCacheNotification);
   }
 
@@ -367,8 +368,10 @@ class InfiniteQueryObserver<TData, TError extends Exception, TPageParam>
         getPreviousPageParam: getPreviousPageParam,
       ),
     );
+    // Registered so the cache does not collect the query while it is observed.
     cache.build<InfiniteQueryData<TData, TPageParam>, TError>(
       queryKey: queryKey,
+      observer: this,
     );
     cache.subscribe(hashCode, _onQueryCacheNotification);
     _paramFlag = initialPageParam;
