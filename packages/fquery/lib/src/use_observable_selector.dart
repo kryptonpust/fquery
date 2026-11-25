@@ -5,6 +5,9 @@ import 'package:fquery_core/fquery_core.dart';
 T useObservableSelector<T>(Observable observable, T Function() getValue) {
   final state = useState<T>(getValue());
   final mounted = useRef(true);
+  // The listener is registered once, so it reads the getter of the latest
+  // build (e.g. the current query key, not the first one).
+  final latestGetValue = useRef(getValue)..value = getValue;
 
   useEffect(() {
     mounted.value = true;
@@ -19,11 +22,11 @@ T useObservableSelector<T>(Observable observable, T Function() getValue) {
         // During build, defer to next frame
         schedulerBinding.addPostFrameCallback((_) {
           if (mounted.value) {
-            state.value = getValue();
+            state.value = latestGetValue.value();
           }
         });
       } else {
-        state.value = getValue();
+        state.value = latestGetValue.value();
       }
     }
 
